@@ -68,7 +68,6 @@ def load_data(data_dir):
 
         # Set category path
         category_path = os.path.join(data_dir, str(category))
-        print('Processing category: ', category_path)
 
         # Get list of files for this category
         file_list = os.listdir(category_path)
@@ -90,9 +89,6 @@ def load_data(data_dir):
             # Add this images label
             labels.append(category)
 
-    print('images=', len(images))
-    print('labels=', len(labels))
-
     return tuple((images, labels))
 
 
@@ -103,12 +99,16 @@ def get_model():
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
 
+    bias_initializer = tf.keras.initializers.HeNormal()
+
     # Create a convolutional neural network
     model = tf.keras.models.Sequential([
 
         # Convolutional layer. Learn 32 filters using a 3x3 kernel
         tf.keras.layers.Conv2D(
-            32, (5, 5), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+            32, (3, 3), activation="relu", use_bias=True,
+            bias_initializer=bias_initializer,
+            input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
         ),
 
         # Max-pooling layer, using 2x2 pool size
@@ -116,7 +116,9 @@ def get_model():
 
         # Convolutional layer. Learn 32 filters using a 3x3 kernel
         tf.keras.layers.Conv2D(
-            32, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+            32, (3, 3), activation="relu", use_bias=True,
+            bias_initializer=bias_initializer,
+            input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
         ),
 
         # Max-pooling layer, using 2x2 pool size
@@ -125,9 +127,9 @@ def get_model():
         # Flatten units
         tf.keras.layers.Flatten(),
 
-        # Add a hidden layer with dropout
-        tf.keras.layers.Dense(256, activation="sigmoid"),
-        tf.keras.layers.Dense(256, activation="relu"),
+        # Add two hidden layers with dropout
+        tf.keras.layers.Dense(128, activation="relu"),
+        tf.keras.layers.Dense(128, activation="relu"),
         tf.keras.layers.Dropout(0.2),
 
         # Add an output layer with output units for all categories
